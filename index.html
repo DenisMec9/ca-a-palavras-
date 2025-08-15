@@ -17,17 +17,18 @@
             background: #f8f9fa;
             color: #333;
             min-height: 100vh;
-            padding: 15px;
+            padding: 10px;
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 100%;
             width: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            margin: 20px auto;
+            padding: 15px;
+            margin: 10px auto;
             backdrop-filter: blur(10px);
             color: #333;
         }
@@ -35,7 +36,7 @@
         h1 {
             text-align: center;
             color: #d35400;
-            font-size: 2.2em;
+            font-size: 2em;
             margin-bottom: 8px;
             font-family: 'Oswald', sans-serif;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
@@ -46,7 +47,7 @@
             color: #27ae60;
             font-size: 1.1em;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .difficulty {
@@ -78,19 +79,19 @@
 
         .instructions {
             background-color: #f1f8ff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             margin-bottom: 20px;
             border-left: 5px solid #3498db;
-            font-size: 15px;
+            font-size: 16px;
             line-height: 1.5;
         }
 
-        /* Área com a imagem de fundo */
+        /* Área com imagem de fundo */
         .game-area {
             background: url('fundo.jpg') no-repeat center center;
             background-size: cover;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
             margin: 20px 0;
@@ -98,7 +99,22 @@
             overflow: hidden;
         }
 
-        /* Removemos o ::before com o branco opaco */
+        /* Aplicamos um filtro leve para melhorar contraste */
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7); /* Branco translúcido para clarear */
+            z-index: 0;
+        }
+
+        .game-area > * {
+            position: relative;
+            z-index: 1;
+        }
 
         .grid-container {
             display: flex;
@@ -115,24 +131,25 @@
             border: 3px solid #333;
             border-radius: 10px;
             overflow: hidden;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .cell {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(255, 255, 255, 0.9); /* Leve transparência */
+            background-color: white;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 18px; /* Maior para celular */
             cursor: pointer;
             user-select: none;
             transition: all 0.2s ease;
             color: #333;
-            border: 1px solid #eee;
+            border: 1px solid #ddd;
+            touch-action: manipulation;
         }
 
         .cell.selected {
@@ -149,36 +166,36 @@
         .words-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
             margin-top: 20px;
             justify-content: center;
         }
 
         .words-section {
             flex: 1;
-            min-width: 260px;
-            max-width: 300px;
+            min-width: 180px;
+            max-width: 220px;
         }
 
         .words-section h3 {
             text-align: center;
-            padding: 10px 0;
-            margin-bottom: 12px;
+            padding: 8px 0;
+            margin-bottom: 10px;
             border-bottom: 3px solid #ddd;
             color: #2c3e50;
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-family: 'Oswald', sans-serif;
         }
 
         .words-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 8px;
+            gap: 6px;
         }
 
         .word-item {
             padding: 10px;
-            background-color: rgba(255, 255, 255, 0.85); /* Leve transparência */
+            background-color: rgba(255, 255, 255, 0.85);
             border-radius: 8px;
             font-weight: 600;
             text-align: center;
@@ -236,16 +253,17 @@
         @media (max-width: 768px) {
             h1 { font-size: 1.8em; }
             .word-search { grid-template-columns: repeat(16, 1fr); }
-            .cell { width: 28px; height: 28px; font-size: 14px; }
-            button { padding: 12px 20px; font-size: 15px; }
+            .cell { width: 36px; height: 36px; font-size: 20px; }
+            .word-item { font-size: 14px; }
+            .words-section { min-width: 100%; }
         }
 
         @media (max-width: 480px) {
             h1 { font-size: 1.6em; }
             .word-search { grid-template-columns: repeat(14, 1fr); }
-            .cell { width: 25px; height: 25px; font-size: 13px; }
-            .words-section { min-width: 100%; }
-            .instructions { font-size: 14px; }
+            .cell { width: 38px; height: 38px; font-size: 22px; }
+            .word-item { font-size: 14px; }
+            .instructions { font-size: 15px; }
         }
     </style>
 </head>
@@ -263,7 +281,7 @@
             <p><strong>Toque nas letras</strong> para formar uma palavra. Toque em uma <strong>letra já selecionada</strong> para confirmar!</p>
         </div>
 
-        <!-- Área com a imagem de fundo -->
+        <!-- Área com imagem de fundo -->
         <div class="game-area">
             <div class="grid-container">
                 <div class="word-search" id="grid"></div>
@@ -459,46 +477,38 @@
             const row = parseInt(this.dataset.row);
             const col = parseInt(this.dataset.col);
 
-            // Evita ação durante feedback
             if (window.checking) return;
 
-            // Verifica se a célula já está selecionada
             const index = selectedCells.findIndex(cell => cell.row === row && cell.col === col);
 
             if (index !== -1) {
-                // Clicou em uma já selecionada → confirma!
                 if (selectedCells.length >= 2) {
                     checkWord();
                 } else {
-                    // Se só tem 1 letra, remove
                     selectedCells.splice(index, 1);
                     this.classList.remove('selected');
                 }
             } else {
-                // Adiciona à seleção (sem verificar ainda)
                 selectedCells.push({ row, col });
                 this.classList.add('selected');
             }
         }
 
-        // Verifica a palavra apenas quando o jogador confirma
+        // Verifica a palavra
         function checkWord() {
             if (window.checking) return;
 
             window.checking = true;
 
-            // Extrai a palavra da seleção
             const word = selectedCells.map(({ row, col }) => grid[row][col]).join('').toUpperCase();
             const reversed = word.split('').reverse().join('');
             const match = allWords.find(w => w === word || w === reversed);
 
             if (match && !foundWords.has(match)) {
-                // ✅ Acertou!
                 foundWords.add(match);
                 markWordAsFound(match);
                 updateProgress();
 
-                // 🎉 Vitória?
                 if (foundWords.size === allWords.length) {
                     clearInterval(timerInterval);
                     setTimeout(() => {
@@ -506,7 +516,6 @@
                     }, 600);
                 }
             } else {
-                // ❌ Errou: destaque vermelho
                 selectedCells.forEach(({ row, col }) => {
                     const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
                     if (cell) {
@@ -515,7 +524,6 @@
                     }
                 });
 
-                // Limpa em 1.5s
                 setTimeout(() => {
                     selectedCells.forEach(({ row, col }) => {
                         const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
@@ -527,11 +535,9 @@
                     selectedCells = [];
                     window.checking = false;
                 }, 1500);
-
                 return;
             }
 
-            // Limpa seleção após acerto
             setTimeout(() => {
                 selectedCells.forEach(({ row, col }) => {
                     const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
