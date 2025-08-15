@@ -14,23 +14,10 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: url('https://source.unsplash.com/random/1920x1080/?brazil,flag') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
+            background: #f8f9fa;
+            color: #333;
             min-height: 100vh;
             padding: 15px;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: -1;
         }
 
         .container {
@@ -38,7 +25,7 @@
             width: 100%;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 20px;
             margin: 20px auto;
             backdrop-filter: blur(10px);
@@ -99,6 +86,20 @@
             line-height: 1.5;
         }
 
+        /* Área com a imagem de fundo */
+        .game-area {
+            background: url('fundo.jpg') no-repeat center center;
+            background-size: cover;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Removemos o ::before com o branco opaco */
+
         .grid-container {
             display: flex;
             justify-content: center;
@@ -114,7 +115,7 @@
             border: 3px solid #333;
             border-radius: 10px;
             overflow: hidden;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
@@ -124,7 +125,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.9); /* Leve transparência */
             font-weight: bold;
             font-size: 15px;
             cursor: pointer;
@@ -177,7 +178,7 @@
 
         .word-item {
             padding: 10px;
-            background-color: #f8f9fa;
+            background-color: rgba(255, 255, 255, 0.85); /* Leve transparência */
             border-radius: 8px;
             font-weight: 600;
             text-align: center;
@@ -262,30 +263,33 @@
             <p><strong>Toque nas letras</strong> para formar uma palavra. Toque em uma <strong>letra já selecionada</strong> para confirmar!</p>
         </div>
 
-        <div class="grid-container">
-            <div class="word-search" id="grid"></div>
-        </div>
+        <!-- Área com a imagem de fundo -->
+        <div class="game-area">
+            <div class="grid-container">
+                <div class="word-search" id="grid"></div>
+            </div>
 
-        <div class="words-container">
-            <div class="words-section">
-                <h3>📺 Novelas & Filmes</h3>
-                <div class="words-grid" id="novelas-filmes"></div>
-            </div>
-            <div class="words-section">
-                <h3>🎵 Música & Artistas</h3>
-                <div class="words-grid" id="musicas"></div>
-            </div>
-            <div class="words-section">
-                <h3>🍽️ Comidas & Bebidas</h3>
-                <div class="words-grid" id="comidas-bebidas"></div>
-            </div>
-            <div class="words-section">
-                <h3>🏙️ Cidades & Bairros</h3>
-                <div class="words-grid" id="cidades-bairros"></div>
-            </div>
-            <div class="words-section">
-                <h3>🎨 Cores</h3>
-                <div class="words-grid" id="cores"></div>
+            <div class="words-container">
+                <div class="words-section">
+                    <h3>📺 Novelas & Filmes</h3>
+                    <div class="words-grid" id="novelas-filmes"></div>
+                </div>
+                <div class="words-section">
+                    <h3>🎵 Música & Artistas</h3>
+                    <div class="words-grid" id="musicas"></div>
+                </div>
+                <div class="words-section">
+                    <h3>🍽️ Comidas & Bebidas</h3>
+                    <div class="words-grid" id="comidas-bebidas"></div>
+                </div>
+                <div class="words-section">
+                    <h3>🏙️ Cidades & Bairros</h3>
+                    <div class="words-grid" id="cidades-bairros"></div>
+                </div>
+                <div class="words-section">
+                    <h3>🎨 Cores</h3>
+                    <div class="words-grid" id="cores"></div>
+                </div>
             </div>
         </div>
 
@@ -483,6 +487,7 @@
 
             window.checking = true;
 
+            // Extrai a palavra da seleção
             const word = selectedCells.map(({ row, col }) => grid[row][col]).join('').toUpperCase();
             const reversed = word.split('').reverse().join('');
             const match = allWords.find(w => w === word || w === reversed);
