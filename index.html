@@ -259,7 +259,7 @@
         <div class="progress">Encontradas: <span id="progress">0</span> de <span id="total">60</span></div>
 
         <div class="instructions">
-            <p><strong>Toque nas letras</strong> para formar uma palavra. O jogo verifica <strong>automaticamente</strong>!</p>
+            <p><strong>Toque nas letras</strong> para formar uma palavra. Toque em uma <strong>letra já selecionada</strong> para confirmar!</p>
         </div>
 
         <div class="grid-container">
@@ -350,6 +350,7 @@
             fillEmptyCells();
         }
 
+        // Tenta colocar uma palavra
         function placeWord(word) {
             const directions = [[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]];
             shuffleArray(directions);
@@ -367,6 +368,7 @@
             return false;
         }
 
+        // Verifica se pode colocar
         function canPlace(word, r, c, dx, dy) {
             for (let i = 0; i < word.length; i++) {
                 const nr = r + i*dx, nc = c + i*dy;
@@ -376,6 +378,7 @@
             return true;
         }
 
+        // Preenche células vazias
         function fillEmptyCells() {
             const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             for (let i = 0; i < GRID_SIZE; i++) {
@@ -387,6 +390,7 @@
             }
         }
 
+        // Gera posições aleatórias
         function generateRandomPositions() {
             const pos = [];
             for (let i = 0; i < GRID_SIZE; i++) {
@@ -397,6 +401,7 @@
             return shuffleArray(pos);
         }
 
+        // Embaralha array
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -449,107 +454,112 @@
         function handleCellClick() {
             const row = parseInt(this.dataset.row);
             const col = parseInt(this.dataset.col);
+
+            // Evita ação durante feedback
+            if (window.checking) return;
+
+            // Verifica se a célula já está selecionada
             const index = selectedCells.findIndex(cell => cell.row === row && cell.col === col);
 
             if (index !== -1) {
-                // Remove da seleção
-                selectedCells.splice(index, 1);
-                this.classList.remove('selected');
+                // Clicou em uma já selecionada → confirma!
+                if (selectedCells.length >= 2) {
+                    checkWord();
+                } else {
+                    // Se só tem 1 letra, remove
+                    selectedCells.splice(index, 1);
+                    this.classList.remove('selected');
+                }
             } else {
-                // Adiciona à seleção
+                // Adiciona à seleção (sem verificar ainda)
                 selectedCells.push({ row, col });
                 this.classList.add('selected');
             }
-
-            // Verifica automaticamente se já temos uma palavra
-            if (selectedCells.length >= 2) {
-                checkWord();
-            }
         }
 
-       // Verifica a palavra automaticamente
-function checkWord() {
-    // Evita verificar se já está em processo de feedback
-    if (window.checking || selectedCells.length < 2) return;
+        // Verifica a palavra apenas quando o jogador confirma
+        function checkWord() {
+            if (window.checking) return;
 
-    window.checking = true; // trava temporária
+            window.checking = true;
 
-    const word = selectedCells.map(({ row, col }) => grid[row][col]).join('').toUpperCase();
-    const reversed = word.split('').reverse().join('');
-    const match = allWords.find(w => w === word || w === reversed);
+            const word = selectedCells.map(({ row, col }) => grid[row][col]).join('').toUpperCase();
+            const reversed = word.split('').reverse().join('');
+            const match = allWords.find(w => w === word || w === reversed);
 
-    if (match && !foundWords.has(match)) {
-        // ✅ Palavra correta!
-        foundWords.add(match);
-        markWordAsFound(match);
-        updateProgress();
+            if (match && !foundWords.has(match)) {
+                // ✅ Acertou!
+                foundWords.add(match);
+                markWordAsFound(match);
+                updateProgress();
 
-        // 🎉 Vitória?
-        if (foundWords.size === allWords.length) {
-            clearInterval(timerInterval);
+                // 🎉 Vitória?
+                if (foundWords.size === allWords.length) {
+                    clearInterval(timerInterval);
+                    setTimeout(() => {
+                        alert('🎉 Parabéns! Você completou o jogo!');
+                    }, 600);
+                }
+            } else {
+                // ❌ Errou: destaque vermelho
+                selectedCells.forEach(({ row, col }) => {
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.style.backgroundColor = '#e74c3c';
+                        cell.style.color = 'white';
+                    }
+                });
+
+                // Limpa em 1.5s
+                setTimeout(() => {
+                    selectedCells.forEach(({ row, col }) => {
+                        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                        if (cell) {
+                            cell.classList.remove('selected');
+                            cell.style.cssText = '';
+                        }
+                    });
+                    selectedCells = [];
+                    window.checking = false;
+                }, 1500);
+
+                return;
+            }
+
+            // Limpa seleção após acerto
             setTimeout(() => {
-                alert('🎉 Parabéns! Você completou o jogo!');
-            }, 600);
+                selectedCells.forEach(({ row, col }) => {
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.classList.remove('selected');
+                        cell.style.cssText = '';
+                    }
+                });
+                selectedCells = [];
+                window.checking = false;
+            }, 1500);
         }
-    } else {
-        // ❌ Errado: destaque em vermelho
-        selectedCells.forEach(({ row, col }) => {
-            const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-            if (cell) {
-                cell.style.backgroundColor = '#e74c3c';
-                cell.style.color = 'white';
-                cell.style.transform = 'scale(0.95)';
-            }
-        });
 
-        // Limpa após 1.5 segundos
-        setTimeout(() => {
+        // Marca palavra encontrada
+        function markWordAsFound(word) {
             selectedCells.forEach(({ row, col }) => {
                 const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
                 if (cell) {
                     cell.classList.remove('selected');
-                    // Reseta estilo inline
-                    cell.style.cssText = '';
+                    cell.classList.add('found');
+                    cell.style.transform = 'scale(1.05)';
+                    setTimeout(() => cell.style.transform = 'scale(1)', 200);
                 }
             });
-            selectedCells = [];
-            window.checking = false; // libera nova verificação
-        }, 1500);
-    }
-}
 
-// Marca palavra encontrada com efeito visual
-function markWordAsFound(word) {
-    selectedCells.forEach(({ row, col }) => {
-        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-        if (cell) {
-            cell.classList.remove('selected');
-            cell.classList.add('found');
-
-            // Efeito sutil de "brilho" ao marcar
-            cell.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                cell.style.transform = 'scale(1)';
-            }, 200);
+            document.querySelectorAll('.word-item').forEach(item => {
+                if (item.dataset.word === word) {
+                    item.classList.add('found');
+                    item.style.transform = 'scale(1.05)';
+                    setTimeout(() => item.style.transform = 'scale(1)', 300);
+                }
+            });
         }
-    });
-
-    // Marca na lista lateral com destaque temporário
-    document.querySelectorAll('.word-item').forEach(item => {
-        if (item.dataset.word === word) {
-            item.classList.add('found');
-
-            // Efeito de "flash" suave
-            item.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                item.style.transform = 'scale(1)';
-            }, 300);
-        }
-    });
-
-    // Libera nova verificação
-    window.checking = false;
-}
 
         // Atualiza progresso
         function updateProgress() {
