@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Caça-Palavras - Brasil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: url('https://source.unsplash.com/random/1920x1080/?brazil,flag') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            padding: 15px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            margin: 20px auto;
+            backdrop-filter: blur(10px);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d35400;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #27ae60;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .difficulty {
+            text-align: center;
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1em;
+            border: 2px dashed #ffeaa7;
+        }
+
+        .timer, .progress {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .timer {
+            color: #e74c3c;
+        }
+
+        .progress {
+            color: #2c3e50;
+        }
+
+        .instructions {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .word-search {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 1px;
+            border: 3px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            color: #333;
+            border: 1px solid #eee;
+        }
+
+        .cell.selected {
+            background-color: #85c1e9;
+            color: white;
+        }
+
+        .cell.found {
+            background-color: #d4edda;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .words-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .words-section {
+            flex: 1;
+            min-width: 260px;
+            max-width: 300px;
+        }
+
+        .words-section h3 {
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 12px;
+            border-bottom: 3px solid #ddd;
+            color: #2c3e50;
+            font-size: 1.2em;
+            font-family: 'Oswald', sans-serif;
+        }
+
+        .words-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .word-item {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #495057;
+            border: 1px solid #e9ecef;
+        }
+
+        .word-item.found {
+            background-color: #d4edda;
+            color: #155724;
+            text-decoration: line-through;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 120px;
+        }
+
+        button:hover, button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #hint-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        #reset-btn {
+            background-color: #7f8c8d;
+            color: white;
+        }
+
+        /* Ajustes para mobile */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .word-search { grid-template-columns: repeat(16, 1fr); }
+            .cell { width: 28px; height: 28px; font-size: 14px; }
+            button { padding: 12px 20px; font-size: 15px; }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.6em; }
+            .word-search { grid-template-columns: repeat(14, 1fr); }
+            .cell { width: 25px; height: 25px; font-size: 13px; }
+            .words-section { min-width: 100%; }
+            .instructions { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Caça-Palavras</h1>
+        <p class="subtitle">Brasil: Cultura, Música, Culinária e Mais</p>
+
+        <div class="difficulty">NÍVEL DIFÍCIL</div>
+
+        <div class="timer">Tempo: <span id="time">00:00</span></div>
+        <div class="progress">Encontradas: <span id="progress">0</span> de <span id="total">60</span></div>
+
+        <div class="instructions">
+            <p><strong>Toque nas letras</strong> para formar uma palavra. O jogo verifica <strong>automaticamente</strong>!</p>
+        </div>
+
+        <div class="grid-container">
+            <div class="word-search" id="grid"></div>
+        </div>
+
+        <div class="words-container">
+            <div class="words-section">
+                <h3>📺 Novelas & Filmes</h3>
+                <div class="words-grid" id="novelas-filmes"></div>
+            </div>
+            <div class="words-section">
+                <h3>🎵 Música & Artistas</h3>
+                <div class="words-grid" id="musicas"></div>
+            </div>
+            <div class="words-section">
+                <h3>🍽️ Comidas & Bebidas</h3>
+                <div class="words-grid" id="comidas-bebidas"></div>
+            </div>
+            <div class="words-section">
+                <h3>🏙️ Cidades & Bairros</h3>
+                <div class="words-grid" id="cidades-bairros"></div>
+            </div>
+            <div class="words-section">
+                <h3>🎨 Cores</h3>
+                <div class="words-grid" id="cores"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="hint-btn">💡 Dica</button>
+            <button id="reset-btn">🔄 Reiniciar</button>
+        </div>
+    </div>
+
+    <script>
+        // Palavras por categoria
+        const wordsByCategory = {
+            'novelas-filmes': [
+                'TAPAS&BEIJOS', 'AVENIDA BRASIL', 'MALHACAO', 'AMOR ETERNO', 'DANCING DAYS',
+                'CARANDIRU', 'CIDADE DE DEUS', 'TATUAGEM', 'BACURAU', 'CENTRAL DO BRASIL',
+                'ELA DISSE NAO', 'DOMINGO', 'O CHEIRO DO RANGO', 'TEMPO DE AMAR', 'FAROESTE CABOCLIO'
+            ],
+            'musicas': [
+                'SAMBA', 'MPB', 'AXE', 'FORRO', 'SAMBA ENREDO', 'RODA DE SAMBA',
+                'CHICO BUARQUE', 'GILBERTO GIL', 'CAETANO VELOSO', 'TIM MAIA',
+                'ELIS REGINA', 'JULIETTE', 'MARISA MONTE', 'SEU JORGE', 'MARTINHO DA VILA'
+            ],
+            'comidas-bebidas': [
+                'FEIJOADA', 'ACARAJE', 'MOQUECA', 'PASTEL', 'COXINHA',
+                'CHURRASCO', 'AIPIM', 'ARROZ CARBONARA', 'BRIGADEIRO', 'QUINDIM',
+                'CAIPIRINHA', 'GUARANA', 'SUCO DE CACAU', 'AGUA DE COCO', 'VINHO DO PORTO'
+            ],
+            'cidades-bairros': [
+                'RECIFE', 'OLINDA', 'JABOATAO', 'CABO DE STO AGOSTINHO', 'PAULISTA',
+                'SALVADOR', 'RIO DE JANEIRO', 'SAO PAULO', 'FORTALEZA', 'MANAUS',
+                'BRAZLANDIA', 'ASA SUL', 'TAGUATINGA', 'GUARAPIRANGA', 'VILA MARIANA'
+            ],
+            'cores': [
+                'VERMELHO', 'LARANJA', 'AMARELO', 'VERDE', 'AZUL',
+                'ANIL', 'VIOLETA', 'ROSA', 'MARROM', 'CINZA',
+                'PRETO', 'BRANCO', 'DOURADO', 'PRATEADO', 'TURQUESA'
+            ]
+        };
+
+        // Todas as palavras
+        const allWords = [
+            ...wordsByCategory['novelas-filmes'],
+            ...wordsByCategory['musicas'],
+            ...wordsByCategory['comidas-bebidas'],
+            ...wordsByCategory['cidades-bairros'],
+            ...wordsByCategory['cores']
+        ].map(word => word.replace(/\s+/g, '').toUpperCase());
+
+        // Configurações
+        const GRID_SIZE = 20;
+        let grid = [];
+        let selectedCells = [];
+        let foundWords = new Set();
+        let timerInterval;
+
+        // Inicializa a grade
+        function initializeGrid() {
+            grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(''));
+            for (let word of allWords) {
+                if (!placeWord(word)) console.log(`Erro ao colocar: ${word}`);
+            }
+            fillEmptyCells();
+        }
+
+        function placeWord(word) {
+            const directions = [[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]];
+            shuffleArray(directions);
+            for (let [dx, dy] of directions) {
+                const positions = generateRandomPositions();
+                for (let [r, c] of positions) {
+                    if (canPlace(word, r, c, dx, dy)) {
+                        for (let i = 0; i < word.length; i++) {
+                            grid[r + i*dx][c + i*dy] = word[i];
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function canPlace(word, r, c, dx, dy) {
+            for (let i = 0; i < word.length; i++) {
+                const nr = r + i*dx, nc = c + i*dy;
+                if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) return false;
+                if (grid[nr][nc] !== '' && grid[nr][nc] !== word[i]) return false;
+            }
+            return true;
+        }
+
+        function fillEmptyCells() {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    if (!grid[i][j]) {
+                        grid[i][j] = alphabet[Math.floor(Math.random() * 26)];
+                    }
+                }
+            }
+        }
+
+        function generateRandomPositions() {
+            const pos = [];
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    pos.push([i, j]);
+                }
+            }
+            return shuffleArray(pos);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Renderiza a grade
+        function renderGrid() {
+            const el = document.getElementById('grid');
+            el.innerHTML = '';
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = grid[i][j];
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+
+                    cell.addEventListener('click', handleCellClick);
+                    cell.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        handleCellClick.call(cell);
+                    });
+
+                    el.appendChild(cell);
+                }
+            }
+        }
+
+        // Renderiza as palavras
+        function renderWords() {
+            Object.keys(wordsByCategory).forEach(cat => {
+                const el = document.getElementById(cat);
+                el.innerHTML = '';
+                wordsByCategory[cat].forEach(word => {
+                    const clean = word.replace(/\s+/g, '').toUpperCase();
+                    const item = document.createElement('div');
+                    item.className = 'word-item';
+                    item.textContent = word;
+                    item.dataset.word = clean;
+                    el.appendChild(item);
+                });
+            });
+            document.getElementById('total').textContent = allWords.length;
+        }
+
+        // Clique ou toque na célula
+        function handleCellClick() {
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            const index = selectedCells.findIndex(cell => cell.row === row && cell.col === col);
+
+            if (index !== -1) {
+                // Remove da seleção
+                selectedCells.splice(index, 1);
+                this.classList.remove('selected');
+            } else {
+                // Adiciona à seleção
+                selectedCells.push({ row, col });
+                this.classList.add('selected');
+            }
+
+            // Verifica automaticamente se já temos uma palavra
+            if (selectedCells.length >= 2) {
+                checkWord();
+            }
+        }
+
+       // Verifica a palavra automaticamente
+function checkWord() {
+    // Evita verificar se já está em processo de feedback
+    if (window.checking || selectedCells.length < 2) return;
+
+    window.checking = true; // trava temporária
+
+    const word = selectedCells.map(({ row, col }) => grid[row][col]).join('').toUpperCase();
+    const reversed = word.split('').reverse().join('');
+    const match = allWords.find(w => w === word || w === reversed);
+
+    if (match && !foundWords.has(match)) {
+        // ✅ Palavra correta!
+        foundWords.add(match);
+        markWordAsFound(match);
+        updateProgress();
+
+        // 🎉 Vitória?
+        if (foundWords.size === allWords.length) {
+            clearInterval(timerInterval);
+            setTimeout(() => {
+                alert('🎉 Parabéns! Você completou o jogo!');
+            }, 600);
+        }
+    } else {
+        // ❌ Errado: destaque em vermelho
+        selectedCells.forEach(({ row, col }) => {
+            const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+            if (cell) {
+                cell.style.backgroundColor = '#e74c3c';
+                cell.style.color = 'white';
+                cell.style.transform = 'scale(0.95)';
+            }
+        });
+
+        // Limpa após 1.5 segundos
+        setTimeout(() => {
+            selectedCells.forEach(({ row, col }) => {
+                const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.remove('selected');
+                    // Reseta estilo inline
+                    cell.style.cssText = '';
+                }
+            });
+            selectedCells = [];
+            window.checking = false; // libera nova verificação
+        }, 1500);
+    }
+}
+
+// Marca palavra encontrada com efeito visual
+function markWordAsFound(word) {
+    selectedCells.forEach(({ row, col }) => {
+        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+        if (cell) {
+            cell.classList.remove('selected');
+            cell.classList.add('found');
+
+            // Efeito sutil de "brilho" ao marcar
+            cell.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                cell.style.transform = 'scale(1)';
+            }, 200);
+        }
+    });
+
+    // Marca na lista lateral com destaque temporário
+    document.querySelectorAll('.word-item').forEach(item => {
+        if (item.dataset.word === word) {
+            item.classList.add('found');
+
+            // Efeito de "flash" suave
+            item.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                item.style.transform = 'scale(1)';
+            }, 300);
+        }
+    });
+
+    // Libera nova verificação
+    window.checking = false;
+}
+
+        // Atualiza progresso
+        function updateProgress() {
+            document.getElementById('progress').textContent = foundWords.size;
+        }
+
+        // Inicia temporizador
+        function startTimer() {
+            const start = new Date();
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const sec = Math.floor((now - start) / 1000);
+                const min = String(Math.floor(sec / 60)).padStart(2, '0');
+                const s = String(sec % 60).padStart(2, '0');
+                document.getElementById('time').textContent = `${min}:${s}`;
+            }, 1000);
+        }
+
+        // Botões
+        document.getElementById('hint-btn').addEventListener('click', () => {
+            const remaining = allWords.filter(w => !foundWords.has(w));
+            if (remaining.length > 0) {
+                const hint = remaining[Math.floor(Math.random() * remaining.length)];
+                alert(`🔍 Dica: "${hint}"`);
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if (confirm('Reiniciar o jogo?')) {
+                clearInterval(timerInterval);
+                foundWords.clear();
+                selectedCells = [];
+                document.getElementById('time').textContent = '00:00';
+                initializeGrid();
+                renderGrid();
+                renderWords();
+                startTimer();
+            }
+        });
+
+        // Iniciar jogo
+        window.addEventListener('load', () => {
+            initializeGrid();
+            renderGrid();
+            renderWords();
+            startTimer();
+        });
+    </script>
+</body>
+</html>
